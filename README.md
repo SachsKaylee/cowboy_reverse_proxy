@@ -20,11 +20,11 @@ Available proplist options for the cowboy handler are:
   - `host` *(required)*: The host to proxy to. If a non default port is 
     required add the port to this value. (e.g. `"sahnee.dev:444"`)
 
-  - `protocol` *(default: `"http"`)*: The procol to proxy. Can technically 
-    be any string but only `"http"` and `"https"` is officially supported.
+  - `protocol` *(default: `"http"`)*: The protocol to proxy. Can technically 
+    be any string but only `"http"` and `"https"` are officially supported.
 
-  - `change_host` *(default: `false`)*: Should the "host" header be changed 
-    to the value specified in the "host" option. This can be useful 
+  - `change_host` *(default: `false`)*: Should the `"host"` header be changed 
+    to the value specified in the `host` option. This can be useful 
     for bypassing cross origin checks by pretending that the frontend 
     of the server you are proxying to made the request.
 
@@ -32,7 +32,7 @@ Available proplist options for the cowboy handler are:
     passed the path of every request as a charlist which can modify it. 
     Useful if the proxy path is not the same as the one being proxied to.
 
-  - `disable_proxy_headers` *(default: `false`)*: Disables all x-proxy headers 
+  - `disable_proxy_headers` *(default: `false`)*: Disables all `x-proxy` headers 
     sent by this proxy. You want to set this for security hardening.
 
   - `use_forwarded_for` *(default: `false`)*: Adds or updates the `"x-forwarded-for"`

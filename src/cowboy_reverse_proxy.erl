@@ -19,11 +19,11 @@
 %%%   - host (required): The host to proxy to. If a non default port is 
 %%%     required add the port to this value. (e.g. "sahnee.dev:444")
 %%% 
-%%%   - protocol (default "http"): The procol to proxy. Can technically 
-%%%     be any string but only "http" and "https" is officially supported.
+%%%   - protocol (default "http"): The protocol to proxy. Can technically 
+%%%     be any string but only "http" and "https" are officially supported.
 %%% 
 %%%   - change_host (default: false): Should the "host" header be changed 
-%%%     to the value specified in the "host" option. This can be useful 
+%%%     to the value specified in the host option. This can be useful 
 %%%     for bypassing cross origin checks by pretending that the frontend 
 %%%     of the server you are proxying to made the request.
 %%% 
