@@ -1,0 +1,14 @@
+{application, cowboy_reverse_proxy,
+ [{description, "A reverse proxy for cowboy using the httpc client"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
