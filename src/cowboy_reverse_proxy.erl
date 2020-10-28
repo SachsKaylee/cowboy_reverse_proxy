@@ -115,7 +115,7 @@ request(Req, Opts) ->
   RequestHeaders = request_headers(Req, Opts),
   case cowboy_req:has_body(Req) of
     true ->
-      ContentType = to_string(cowboy_req:parse_header("content-type", Req, "")),
+      ContentType = to_string(cowboy_req:header("content-type", Req, "")),
       {BodyReq, Body} = request_body(Req, Opts),
       {BodyReq, {RequestURL, RequestHeaders, ContentType, Body}};
     false ->
