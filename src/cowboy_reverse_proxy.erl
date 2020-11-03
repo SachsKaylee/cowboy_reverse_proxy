@@ -80,7 +80,7 @@ init(Req0, State) ->
     % Proxy error (not error on remote server, actual e.g. network error)
     Error ->
       ?LOG_ERROR("Proxy error: ~p", [Error]),
-      ErrReq1 = cwoboy_req:reply(502, #{"content-type" => "text/plain"}, dump(Error), Req1),
+      ErrReq1 = cowboy_req:reply(502, #{"content-type" => "text/plain"}, dump(Error), Req1),
       {ok, ErrReq1, State}
   end.
 
