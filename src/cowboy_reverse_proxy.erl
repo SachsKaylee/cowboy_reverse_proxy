@@ -126,7 +126,11 @@ request(Req, Opts) ->
 request_url(Req, Opts) ->
   Path = cowboy_req:path(Req),
   ModifyFun = opts_modify_path(Opts),
-  NewPath = ModifyFun(to_string(Path)),
+  OrigPath = case cowboy_req:qs(Req) of
+    <<>> -> Path;
+    Qs -> [Path, $?, Qs]
+  end,
+  NewPath = ModifyFun(to_string(OrigPath)),
   to_string([opts_protocol(Opts), "://", opts_host(Opts), NewPath]).
 
 %% Creates the request headers.
