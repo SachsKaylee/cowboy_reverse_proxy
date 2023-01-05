@@ -93,13 +93,13 @@ init(Req0, State) ->
 response_headers({{RespVersion, RespStatus, RespReason}, RespHeaders, _RespBody}, Opts) ->
   List = case opts_disable_proxy_headers(Opts) of
     true -> 
-      RespHeaders;
+      tuple_list_to_binary(RespHeaders);
     false ->
       [
-        {"x-proxy-http-version", RespVersion},
-        {"x-proxy-status", to_string(RespStatus)},
-        {"x-proxy-reason", to_string(RespReason)}
-        | RespHeaders
+        {<<"x-proxy-http-version">>, RespVersion},
+        {<<"x-proxy-status">>, to_string(RespStatus)},
+        {<<"x-proxy-reason">>, to_string(RespReason)}
+        | tuple_list_to_binary(RespHeaders)
       ]
   end,
   maps:from_list(List).
@@ -209,6 +209,14 @@ method(M) -> error({unsupported_method, M}).
 to_string(Int) when is_integer(Int) -> integer_to_list(Int);
 to_string(Binary) when is_binary(Binary) -> binary_to_list(Binary);
 to_string(List) -> binary_to_list(iolist_to_binary(List)).
+
+%% Any string to a binary
+to_binary(Binary) when is_binary(Binary) -> Binary;
+to_binary(List) -> iolist_to_binary(List).
+
+%% Converts all keys in to binary
+tuple_list_to_binary(List) ->
+  [{to_binary(Key), to_binary(Value)} || {Key, Value} <- List].
 
 %% Dumps any term into a string representation.
 dump(Term) ->
