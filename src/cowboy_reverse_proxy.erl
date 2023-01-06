@@ -75,7 +75,9 @@ init(Req0, State) ->
     % We got a response from the remote server!
     {ok, Resp = {{_RespVersion, RespStatus, RespReason}, _RespHeaders, RespBody}} ->
       ?LOG_INFO("Proxy response: ~p ~s", [RespStatus, RespReason]),
-      OkReq1 = cowboy_req:reply(RespStatus, response_headers(Resp, State), RespBody, Req1),
+      {CowboyRespHeaders, _CowboyCookies} = response_headers(Resp, State),
+      %% TODO: Set cookies once they have been parsed
+      OkReq1 = cowboy_req:reply(RespStatus, CowboyRespHeaders, RespBody, Req1),
       {ok, OkReq1, State};
     % Proxy error (not error on remote server, actual e.g. network error)
     Error ->
@@ -91,18 +93,31 @@ init(Req0, State) ->
 
 %% Builds the response headers from the remote servers response.
 response_headers({{RespVersion, RespStatus, RespReason}, RespHeaders, _RespBody}, Opts) ->
-  List = case opts_disable_proxy_headers(Opts) of
+  {Headers, Cookies} = process_response_headers(RespHeaders),
+  HeaderMap = case opts_disable_proxy_headers(Opts) of
     true -> 
-      tuple_list_to_binary(RespHeaders);
+      Headers;
     false ->
-      [
-        {<<"x-proxy-http-version">>, RespVersion},
-        {<<"x-proxy-status">>, to_string(RespStatus)},
-        {<<"x-proxy-reason">>, to_string(RespReason)}
-        | tuple_list_to_binary(RespHeaders)
-      ]
+      Headers#{
+        <<"x-proxy-http-version">> => RespVersion,
+        <<"x-proxy-status">> => to_string(RespStatus),
+        <<"x-proxy-reason">> => to_string(RespReason)
+      }
   end,
-  maps:from_list(List).
+  {HeaderMap, Cookies}.
+
+%% Converts all keys to binary and extracts cookies
+process_response_headers(List) ->
+  process_response_headers(List, #{}, []).
+process_response_headers([], HeadersAcc, CookiesAcc) ->
+  {HeadersAcc, CookiesAcc};
+process_response_headers([{Key, Value} | Next], HeadersAcc, CookiesAcc) when is_list(Key) ->
+  process_response_headers([{string:lowercase(to_binary(Key)), to_binary(Value)} | Next], HeadersAcc, CookiesAcc);
+process_response_headers([{Key, Value} | Next], HeadersAcc, CookiesAcc) when Key =:= <<"set-cookie">> ->
+  %% TODO: Parse cookie
+  process_response_headers(Next, HeadersAcc, [Value | CookiesAcc]);
+process_response_headers([{Key, Value} | Next], HeadersAcc, CookiesAcc) ->
+  process_response_headers(Next, maps:put(Key, Value, HeadersAcc), CookiesAcc).
 
 %%%-------------------------------------------------------------------
 %%% REQUEST
@@ -213,10 +228,6 @@ to_string(List) -> binary_to_list(iolist_to_binary(List)).
 %% Any string to a binary
 to_binary(Binary) when is_binary(Binary) -> Binary;
 to_binary(List) -> iolist_to_binary(List).
-
-%% Converts all keys in to binary
-tuple_list_to_binary(List) ->
-  [{to_binary(Key), to_binary(Value)} || {Key, Value} <- List].
 
 %% Dumps any term into a string representation.
 dump(Term) ->
